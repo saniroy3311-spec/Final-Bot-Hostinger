@@ -34,6 +34,34 @@ class Telegram:
         except Exception as e:
             logger.error(f"Telegram send failed: {e}")
 
+    async def notify_start(self) -> None:
+        await self.send("🚀 <b>BOT STARTED</b> — Shiva Sniper v6.5 is now LIVE.")
+
+    async def notify_stop(self) -> None:
+        await self.send("🛑 <b>BOT STOPPED</b> — Shiva Sniper v6.5 is offline.")
+
+    async def notify_trail_stage(self, old_stage: int, new_stage: int, price: float, new_sl: float) -> None:
+        await self.send(
+            f"📈 <b>TRAIL STAGE UP</b>\n"
+            f"Stage : {old_stage} ➔ {new_stage}\n"
+            f"Price : {price:.2f}\n"
+            f"New SL: {new_sl:.2f}"
+        )
+
+    async def notify_breakeven(self, entry_price: float) -> None:
+        await self.send(
+            f"🛡️ <b>BREAKEVEN HIT</b>\n"
+            f"Stop Loss moved to entry: {entry_price:.2f}"
+        )
+
+    async def notify_max_sl(self, price: float, entry_price: float) -> None:
+        await self.send(
+            f"🚨 <b>MAX SL HIT</b>\n"
+            f"Emergency close triggered.\n"
+            f"Entry: {entry_price:.2f}\n"
+            f"Price: {price:.2f}"
+        )
+
     async def notify_entry(self, signal_type: str, entry_price: float,
                            sl: float, tp: float, atr: float) -> None:
         emoji = "🟢" if "Long" in signal_type else "🔴"
