@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shiva Sniper v6.5 — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ── THEME TOKENS ───────────────────────────────────────────── */
+:root {
+  --transition: 0.3s cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="dark"] {
+  --bg-base:     #0a0b0e;
+  --bg-card:     #111318;
+  --bg-card-2:   #161a22;
+  --bg-hover:    #1c2130;
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(255,255,255,0.14);
+  --text-1:      #f0f2f7;
+  --text-2:      #8b93a8;
+  --text-3:      #4d5568;
+  --accent-g:    #00e676;
+  --accent-g2:   #00c853;
+  --accent-r:    #ff4d6d;
+  --accent-r2:   #c9183a;
+  --accent-b:    #448aff;
+  --accent-y:    #ffd740;
+  --accent-p:    #b388ff;
+  --glow-g:      0 0 24px rgba(0,230,118,0.18);
+  --glow-r:      0 0 24px rgba(255,77,109,0.18);
+  --glow-b:      0 0 24px rgba(68,138,255,0.18);
+  --shadow:      0 4px 24px rgba(0,0,0,0.5);
+  --shadow-card: 0 2px 16px rgba(0,0,0,0.4);
+  --scrollbar-bg:#111318;
+  --scrollbar-thumb:#2a2f3f;
+}
+
+[data-theme="light"] {
+  --bg-base:     #f4f6fb;
+  --bg-card:     #ffffff;
+  --bg-card-2:   #f8faff;
+  --bg-hover:    #eef1f8;
+  --border:      rgba(0,0,0,0.07);
+  --border-hi:   rgba(0,0,0,0.13);
+  --text-1:      #111827;
+  --text-2:      #4b5563;
+  --text-3:      #9ca3af;
+  --accent-g:    #00a65a;
+  --accent-g2:   #007a44;
+  --accent-r:    #e53935;
+  --accent-r2:   #b71c1c;
+  --accent-b:    #1565c0;
+  --accent-y:    #f59e0b;
+  --accent-p:    #7c3aed;
+  --glow-g:      0 0 16px rgba(0,166,90,0.12);
+  --glow-r:      0 0 16px rgba(229,57,53,0.12);
+  --glow-b:      0 0 16px rgba(21,101,192,0.12);
+  --shadow:      0 4px 20px rgba(0,0,0,0.1);
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.07);
+  --scrollbar-bg:#f4f6fb;
+  --scrollbar-thumb:#d1d5db;
+}
+
+/* ── RESET & BASE ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+::-webkit-scrollbar { width: 6px; background: var(--scrollbar-bg); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-1);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ── TOP NAV ────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  height: 60px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700; font-size: 15px;
+  letter-spacing: -0.3px;
+  color: var(--text-1);
+}
+
+.nav-brand .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-g);
+  box-shadow: var(--glow-g);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform: scale(1); }
+  50%      { opacity:0.5; transform: scale(0.75); }
+}
+
+.nav-right { display: flex; align-items: center; gap: 16px; }
+
+.status-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.status-badge.live {
+  background: rgba(0,230,118,0.1);
+  border-color: rgba(0,230,118,0.3);
+  color: var(--accent-g);
+}
+[data-theme="light"] .status-badge.live {
+  background: rgba(0,166,90,0.1);
+  border-color: rgba(0,166,90,0.25);
+}
+.status-badge .led {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  position: relative;
+  width: 52px; height: 28px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.theme-toggle input { display: none; }
+.theme-toggle .track {
+  position: absolute; inset: 0;
+  background: var(--bg-card-2);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 14px;
+  transition: all var(--transition);
+}
+.theme-toggle .thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--accent-b);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  transition: transform var(--transition), background var(--transition);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.theme-toggle input:checked ~ .thumb {
+  transform: translateX(24px);
+  background: var(--accent-y);
+}
+.time-display {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; color: var(--text-2);
+  letter-spacing: 0.5px;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────────── */
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 28px 60px;
+}
+
+.section-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+/* ── STAT CARDS ROW ─────────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+  background: var(--card-accent, var(--accent-b));
+  opacity: 0.7;
+}
+.stat-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hi);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.stat-icon {
+  font-size: 20px; margin-bottom: 10px;
+  display: block;
+}
+.stat-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--text-2); margin-bottom: 6px;
+}
+.stat-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 26px; font-weight: 700;
+  color: var(--text-1);
+  line-height: 1;
+}
+.stat-value.positive { color: var(--accent-g); }
+.stat-value.negative { color: var(--accent-r); }
+.stat-sub {
+  font-size: 11px; color: var(--text-3);
+  margin-top: 4px;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── GRID LAYOUT ────────────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+@media (max-width: 900px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ── PANEL / CARD ───────────────────────────────────────────── */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 24px;
+  transition: background var(--transition), border-color var(--transition);
+}
+.panel-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-1);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-title .icon { font-size: 16px; }
+
+/* ── POSITION CARD ──────────────────────────────────────────── */
+.position-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  transition: all var(--transition);
+}
+.position-card.long  { border-color: rgba(0,230,118,0.35); }
+.position-card.short { border-color: rgba(255,77,109,0.35); }
+.position-card.none  { border-style: dashed; }
+[data-theme="light"] .position-card.long  { border-color: rgba(0,166,90,0.4); }
+[data-theme="light"] .position-card.short { border-color: rgba(229,57,53,0.4); }
+
+.pos-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.pos-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 800;
+  letter-spacing: 0.8px; text-transform: uppercase;
+}
+.pos-badge.long  { background: rgba(0,230,118,0.12); color: var(--accent-g); }
+.pos-badge.short { background: rgba(255,77,109,0.12); color: var(--accent-r); }
+.pos-badge.none  { background: var(--bg-card-2); color: var(--text-3); }
+[data-theme="light"] .pos-badge.long  { background: rgba(0,166,90,0.1); }
+[data-theme="light"] .pos-badge.short { background: rgba(229,57,53,0.1); }
+
+.pos-pl {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px; font-weight: 700;
+}
+.pos-pl.positive { color: var(--accent-g); text-shadow: var(--glow-g); }
+.pos-pl.negative { color: var(--accent-r); text-shadow: var(--glow-r); }
+.pos-pl.neutral  { color: var(--text-2); }
+
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 700px) { .pos-grid { grid-template-columns: repeat(2,1fr); } }
+
+.pos-item label {
+  display: block;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 4px;
+}
+.pos-item .val {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px; font-weight: 700;
+  color: var(--text-1);
+}
+.pos-item .val.sl  { color: var(--accent-r); }
+.pos-item .val.tp  { color: var(--accent-g); }
+
+/* Trail stage progress */
+.trail-stages {
+  display: flex; gap: 6px; margin-top: 16px;
+}
+.trail-stage-pip {
+  flex: 1; height: 6px; border-radius: 3px;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.trail-stage-pip.active { background: var(--accent-p); border-color: var(--accent-p); }
+.trail-stage-pip.done   { background: var(--accent-g); border-color: var(--accent-g); }
+.trail-stage-label {
+  font-size: 10px; color: var(--text-3);
+  font-family: 'Space Mono', monospace;
+  margin-top: 6px; text-align: center;
+}
+
+/* ── CHART CANVAS ───────────────────────────────────────────── */
+canvas {
+  width: 100% !important;
+  display: block;
+}
+
+/* ── TRADE TABLE ────────────────────────────────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--bg-card-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:last-child { border-bottom: none; }
+td {
+  padding: 11px 14px;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+td.mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+td.win  { color: var(--accent-g); font-weight: 700; }
+td.loss { color: var(--accent-r); font-weight: 700; }
+td.dir-long  { color: var(--accent-g); font-weight: 700; }
+td.dir-short { color: var(--accent-r); font-weight: 700; }
+
+/* ── WIN RATE RING ──────────────────────────────────────────── */
+.ring-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 0;
+}
+.ring-svg { width: 140px; height: 140px; }
+.ring-svg circle { fill: none; stroke-linecap: round; }
+.ring-bg { stroke: var(--bg-card-2); stroke-width: 12; }
+.ring-fill { stroke: var(--accent-g); stroke-width: 12; transition: stroke-dashoffset 1.2s ease; }
+[data-theme="light"] .ring-bg { stroke: var(--bg-hover); }
+.ring-pct {
+  font-family: 'Space Mono', monospace;
+  font-size: 28px; font-weight: 700;
+  fill: var(--text-1);
+}
+.ring-label { fill: var(--text-3); font-size: 11px; }
+.ring-stats {
+  display: flex; gap: 24px; margin-top: 16px;
+}
+.ring-stat { text-align: center; }
+.ring-stat-val {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 18px; font-weight: 700;
+}
+.ring-stat-val.w { color: var(--accent-g); }
+.ring-stat-val.l { color: var(--accent-r); }
+.ring-stat-lbl {
+  font-size: 10px; color: var(--text-3);
+  letter-spacing: 0.8px; text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── DONUT for signal types ─────────────────────────────────── */
+#donut-wrap {
+  display: flex; align-items: center; justify-content: center;
+  gap: 24px; flex-wrap: wrap;
+}
+.donut-legend { display: flex; flex-direction: column; gap: 10px; }
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-2);
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── EMPTY STATE ────────────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-3);
+}
+.empty-icon { font-size: 32px; margin-bottom: 10px; }
+.empty-text { font-size: 13px; }
+
+/* ── FOOTER ─────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 11px;
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  margin-top: 20px;
+}
+.api-note {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 6px;
+  background: var(--bg-card-2); border: 1px solid var(--border);
+  font-size: 11px; color: var(--text-3);
+  font-family: 'Space Mono', monospace;
+  margin-bottom: 14px;
+}
+
+/* ── ANIMATIONS ─────────────────────────────────────────────── */
+.fade-in { animation: fadeIn 0.5s ease both; }
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(10px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <span class="dot"></span>
+    SHIVA SNIPER v6.5
+  </div>
+  <div class="nav-right">
+    <div class="status-badge live" id="bot-status">
+      <span class="led"></span>
+      <span id="status-text">LIVE</span>
+    </div>
+    <span class="time-display" id="clock">--:--:--</span>
+    <label class="theme-toggle" title="Toggle theme">
+      <input type="checkbox" id="theme-check"/>
+      <span class="track"></span>
+      <span class="thumb" id="thumb-icon">🌙</span>
+    </label>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- API Config note -->
+  <div style="margin-bottom:18px;">
+    <div class="api-note">
+      📡 Bot API endpoint:
+      <strong id="api-url-display">http://localhost:10000</strong>
+      &nbsp;·&nbsp; Data refreshes every 5 s
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="section-label">Performance Overview</div>
+  <div class="stats-row" id="kpi-row">
+    <div class="stat-card fade-in" style="--card-accent:var(--accent-b); animation-delay:.05s">
+      <span class="stat-icon">📊</span>
+      <div class="stat-label">Total Trades</div>
+      <div class="stat-value" id="kpi-total">—</div>
+      <div class="stat-sub" id="kpi-sub-total">all time</div>
+    </div>
+    <div class="stat-card fade-in" style="--card-accent:var(--accent-g); animation-delay:.1s">
+      <span class="stat-icon">🏆</span>
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value" id="kpi-winrate">—</div>
+      <div class="stat-sub" id="kpi-sub-wr">wins / total</div>
+    </div>
+    <div class="stat-card fade-in" style="--card-accent:var(--accent-g); animation-delay:.15s">
+      <span class="stat-icon">💰</span>
+      <div class="stat-label">Total P/L</div>
+      <div class="stat-value" id="kpi-pl">—</div>
+      <div class="stat-sub">USDT</div>
+    </div>
+    <div class="stat-card fade-in" style="--card-accent:var(--accent-g); animation-delay:.2s">
+      <span class="stat-icon">⭐</span>
+      <div class="stat-label">Best Trade</div>
+      <div class="stat-value positive" id="kpi-best">—</div>
+      <div class="stat-sub">USDT</div>
+    </div>
+    <div class="stat-card fade-in" style="--card-accent:var(--accent-r); animation-delay:.25s">
+      <span class="stat-icon">💥</span>
+      <div class="stat-label">Worst Trade</div>
+      <div class="stat-value negative" id="kpi-worst">—</div>
+      <div class="stat-sub">USDT</div>
+    </div>
+    <div class="stat-card fade-in" style="--card-accent:var(--accent-y); animation-delay:.3s">
+      <span class="stat-icon">🔁</span>
+      <div class="stat-label">Trail Stage</div>
+      <div class="stat-value" id="kpi-stage">—</div>
+      <div class="stat-sub">current trade</div>
+    </div>
+  </div>
+
+  <!-- OPEN POSITION -->
+  <div class="section-label">Open Position</div>
+  <div class="position-card none" id="pos-card">
+    <div class="pos-header">
+      <span class="pos-badge none" id="pos-badge">⬛ NO POSITION</span>
+      <span class="pos-pl neutral" id="pos-pl">+0.00 USDT</span>
+    </div>
+    <div class="pos-grid" id="pos-grid">
+      <div class="pos-item"><label>Entry</label><div class="val" id="pos-entry">—</div></div>
+      <div class="pos-item"><label>Stop Loss</label><div class="val sl" id="pos-sl">—</div></div>
+      <div class="pos-item"><label>Take Profit</label><div class="val tp" id="pos-tp">—</div></div>
+      <div class="pos-item"><label>ATR</label><div class="val" id="pos-atr">—</div></div>
+    </div>
+    <div class="trail-stages" id="trail-pips">
+      <div class="trail-stage-pip" data-s="1"></div>
+      <div class="trail-stage-pip" data-s="2"></div>
+      <div class="trail-stage-pip" data-s="3"></div>
+      <div class="trail-stage-pip" data-s="4"></div>
+      <div class="trail-stage-pip" data-s="5"></div>
+    </div>
+    <div class="trail-stage-label" id="trail-label">Trail Stage: —</div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="grid-2 fade-in" style="animation-delay:.35s">
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📈</span> Cumulative P/L</div>
+      <canvas id="pl-chart" height="180"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🎯</span> Win Rate</div>
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 140 140" id="ring-svg">
+          <circle class="ring-bg" cx="70" cy="70" r="54"/>
+          <circle class="ring-fill" id="ring-fill" cx="70" cy="70" r="54"
+                  stroke-dasharray="339.3" stroke-dashoffset="339.3"
+                  transform="rotate(-90 70 70)"/>
+          <text class="ring-pct" id="ring-pct" x="70" y="66" text-anchor="middle"
+                dominant-baseline="middle">0%</text>
+          <text class="ring-label" id="ring-sub" x="70" y="84" text-anchor="middle">0 / 0 trades</text>
+        </svg>
+        <div class="ring-stats">
+          <div class="ring-stat">
+            <span class="ring-stat-val w" id="ring-wins">0</span>
+            <div class="ring-stat-lbl">Wins</div>
+          </div>
+          <div class="ring-stat">
+            <span class="ring-stat-val l" id="ring-losses">0</span>
+            <div class="ring-stat-lbl">Losses</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3 fade-in" style="animation-delay:.4s">
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📊</span> P/L per Trade</div>
+      <canvas id="bar-chart" height="160"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🔵</span> Signal Types</div>
+      <div id="donut-wrap">
+        <canvas id="donut-chart" width="140" height="140"></canvas>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADE LOG -->
+  <div class="panel fade-in" style="animation-delay:.45s">
+    <div class="panel-title"><span class="icon">📋</span> Trade History</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Time</th>
+            <th>Signal</th>
+            <th>Dir</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>SL</th>
+            <th>TP</th>
+            <th>Stage</th>
+            <th>Reason</th>
+            <th>P/L</th>
+          </tr>
+        </thead>
+        <tbody id="trade-table-body">
+          <tr><td colspan="11"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No trades yet</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  SHIVA SNIPER v6.5 · Delta Exchange India · WebSocket Trail Engine
+  · Dashboard refreshes every 5s via bot REST API
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   THEME TOGGLE
+══════════════════════════════════════════════════════════════ */
+const html  = document.documentElement;
+const check = document.getElementById('theme-check');
+const thumb = document.getElementById('thumb-icon');
+
+function applyTheme(dark) {
+  html.setAttribute('data-theme', dark ? 'dark' : 'light');
+  thumb.textContent = dark ? '🌙' : '☀️';
+  check.checked = !dark;
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
+  if (window._plChart) redrawCharts();
+}
+
+check.addEventListener('change', () => applyTheme(!check.checked));
+
+// Restore saved theme
+const saved = localStorage.getItem('theme') || 'dark';
+applyTheme(saved === 'dark');
+
+/* ── Clock ── */
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toUTCString().slice(17, 25) + ' UTC';
+}
+tick(); setInterval(tick, 1000);
+
+/* ══════════════════════════════════════════════════════════════
+   DEMO DATA GENERATOR (used when API is unreachable)
+══════════════════════════════════════════════════════════════ */
+function makeDemoData() {
+  const types = ['Trend Long','Trend Short','Range Long','Range Short'];
+  const reasons = ['TP','SL','Trail S3','Trail S4','Trail S5','Max SL','BE'];
+  const trades = [];
+  let cumPL = 0, entry = 68000;
+  const now = Date.now();
+  for (let i = 0; i < 22; i++) {
+    const isLong   = Math.random() > 0.5;
+    const isTrend  = Math.random() > 0.5;
+    const atr      = 350 + Math.random() * 200;
+    const stopDist = atr * (isTrend ? 0.6 : 0.5);
+    const tp       = entry + stopDist * (isTrend ? 4 : 2.5) * (isLong ? 1 : -1);
+    const sl       = entry - stopDist * (isLong ? 1 : -1);
+    const raw_pl   = (Math.random() > 0.38 ? 1 : -1) * (Math.random() * 800 + 40);
+    const exit_px  = isLong ? entry + raw_pl / 30 : entry - raw_pl / 30;
+    cumPL += raw_pl;
+    const ts = new Date(now - (22 - i) * 4 * 3600000).toISOString();
+    trades.push({
+      ts, signal_type: types[Math.floor(Math.random() * types.length)],
+      is_long: isLong, entry_price: entry, exit_price: parseFloat(exit_px.toFixed(1)),
+      sl: parseFloat(sl.toFixed(1)), tp: parseFloat(tp.toFixed(1)),
+      atr: parseFloat(atr.toFixed(1)), qty: 30,
+      real_pl: parseFloat(raw_pl.toFixed(2)),
+      exit_reason: reasons[Math.floor(Math.random() * reasons.length)],
+      trail_stage: Math.floor(Math.random() * 5)
+    });
+    entry += (Math.random() - 0.5) * 600;
+  }
+  const wins   = trades.filter(t => t.real_pl > 0).length;
+  const losses = trades.filter(t => t.real_pl < 0).length;
+  const total_pl = trades.reduce((s, t) => s + t.real_pl, 0);
+  return {
+    summary: {
+      total: trades.length, wins, losses,
+      total_pl: parseFloat(total_pl.toFixed(2)),
+      best: Math.max(...trades.map(t => t.real_pl)),
+      worst: Math.min(...trades.map(t => t.real_pl)),
+      win_rate: parseFloat((wins / trades.length * 100).toFixed(1)),
+    },
+    trades,
+    open_trade: Math.random() > 0.5 ? {
+      signal_type: types[0], is_long: true,
+      entry_price: 68420, sl: 67800, tp: 71800,
+      atr: 380, trail_stage: 2, current_sl: 68210,
+    } : null
+  };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   API FETCH — tries bot REST, falls back to demo
+══════════════════════════════════════════════════════════════ */
+const API_BASE = localStorage.getItem('api_base') || 'http://localhost:10000';
+document.getElementById('api-url-display').textContent = API_BASE;
+
+async function fetchData() {
+  try {
+    const [sumRes, tradesRes, posRes] = await Promise.all([
+      fetch(`${API_BASE}/api/summary`, {signal: AbortSignal.timeout(3000)}),
+      fetch(`${API_BASE}/api/trades?limit=50`, {signal: AbortSignal.timeout(3000)}),
+      fetch(`${API_BASE}/api/position`, {signal: AbortSignal.timeout(3000)}),
+    ]);
+    if (!sumRes.ok) throw new Error('API unavailable');
+    return {
+      summary:    await sumRes.json(),
+      trades:     await tradesRes.json(),
+      open_trade: posRes.ok ? await posRes.json() : null,
+    };
+  } catch {
+    // Use demo data when bot isn't running locally
+    return makeDemoData();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHART HELPERS (vanilla canvas — no lib dependency)
+══════════════════════════════════════════════════════════════ */
+function cssVar(v) {
+  return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+}
+
+function drawLineChart(canvasId, labels, data, color1) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 48;
+  const H = 180;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { t:16, r:16, b:28, l:54 };
+  const iW  = W - pad.l - pad.r;
+  const iH  = H - pad.t - pad.b;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (!data.length) return;
+
+  const minV = Math.min(0, ...data);
+  const maxV = Math.max(0, ...data);
+  const range = maxV - minV || 1;
+
+  const toX = i => pad.l + (i / (data.length - 1)) * iW;
+  const toY = v => pad.t + iH - ((v - minV) / range) * iH;
+
+  // Grid lines
+  ctx.strokeStyle = cssVar('--border'); ctx.lineWidth = 1;
+  const steps = 4;
+  for (let s = 0; s <= steps; s++) {
+    const y = pad.t + (s / steps) * iH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
+    const v = maxV - (s / steps) * range;
+    ctx.fillStyle = cssVar('--text-3');
+    ctx.font = '10px Space Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText((v >= 0 ? '+' : '') + v.toFixed(0), pad.l - 6, y + 3);
+  }
+
+  // Zero line
+  const y0 = toY(0);
+  ctx.strokeStyle = cssVar('--border-hi'); ctx.lineWidth = 1.5;
+  ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(pad.l + iW, y0); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Fill gradient
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
+  grad.addColorStop(0, color1 + '55');
+  grad.addColorStop(1, color1 + '00');
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(data[0]));
+  data.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
+  ctx.lineTo(toX(data.length - 1), pad.t + iH);
+  ctx.lineTo(pad.l, pad.t + iH);
+  ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = color1; ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.moveTo(toX(0), toY(data[0]));
+  data.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
+  ctx.stroke();
+
+  // Dots at each point
+  data.forEach((v, i) => {
+    ctx.beginPath();
+    ctx.arc(toX(i), toY(v), 3, 0, Math.PI*2);
+    ctx.fillStyle = v >= 0 ? cssVar('--accent-g') : cssVar('--accent-r');
+    ctx.fill();
+  });
+}
+
+function drawBarChart(canvasId, data) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 48;
+  const H = 160;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  if (!data.length) return;
+
+  const pad = { t:10, r:10, b:10, l:10 };
+  const iW = W - pad.l - pad.r;
+  const iH = H - pad.t - pad.b;
+  ctx.clearRect(0, 0, W, H);
+
+  const values = data.map(t => t.real_pl);
+  const minV = Math.min(0, ...values);
+  const maxV = Math.max(0, ...values);
+  const range = maxV - minV || 1;
+
+  const barW = Math.max(2, iW / data.length - 2);
+  const y0   = pad.t + iH - ((0 - minV) / range) * iH;
+
+  values.forEach((v, i) => {
+    const x   = pad.l + (i / data.length) * iW + 1;
+    const barH = Math.abs((v / range) * iH);
+    const y   = v >= 0 ? y0 - barH : y0;
+    ctx.fillStyle = v >= 0 ? cssVar('--accent-g') + 'cc' : cssVar('--accent-r') + 'cc';
+    ctx.beginPath();
+    ctx.roundRect(x, y, barW, barH, 2);
+    ctx.fill();
+  });
+
+  // Zero line
+  ctx.strokeStyle = cssVar('--border-hi'); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(pad.l + iW, y0); ctx.stroke();
+}
+
+function drawDonut(canvasId, segments) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 70, cy = 70, r = 52, inner = 34;
+  ctx.clearRect(0, 0, 140, 140);
+  const total = segments.reduce((s,g) => s + g.val, 0) || 1;
+  let angle = -Math.PI / 2;
+  segments.forEach(seg => {
+    const sweep = (seg.val / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, angle, angle + sweep);
+    ctx.closePath();
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+    angle += sweep;
+  });
+  // Hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, inner, 0, Math.PI*2);
+  ctx.fillStyle = cssVar('--bg-card');
+  ctx.fill();
+  // Center text
+  ctx.fillStyle = cssVar('--text-1');
+  ctx.font = 'bold 16px Space Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(segments.length, cx, cy + 6);
+}
+
+function drawRing(pct) {
+  const circ = 339.3;
+  const offset = circ * (1 - pct / 100);
+  const fill = document.getElementById('ring-fill');
+  fill.setAttribute('stroke-dashoffset', offset);
+  const c = pct >= 60 ? cssVar('--accent-g') : pct >= 40 ? cssVar('--accent-y') : cssVar('--accent-r');
+  fill.setAttribute('stroke', c);
+}
+
+let _allTrades = [];
+window._plChart = null;
+
+function redrawCharts() {
+  const trades = _allTrades;
+  if (!trades.length) return;
+
+  // Cumulative PL line
+  let cum = 0;
+  const cumData = trades.map(t => { cum += t.real_pl; return parseFloat(cum.toFixed(2)); });
+  const lineColor = cum >= 0 ? cssVar('--accent-g') : cssVar('--accent-r');
+  drawLineChart('pl-chart', [], cumData, lineColor);
+
+  // Bar chart (last 20)
+  const last20 = trades.slice(-20);
+  drawBarChart('bar-chart', last20);
+
+  // Donut
+  const typeMap = {};
+  const colors = [
+    cssVar('--accent-g'), cssVar('--accent-r'),
+    cssVar('--accent-b'), cssVar('--accent-y'),
+    cssVar('--accent-p')
+  ];
+  trades.forEach(t => { typeMap[t.signal_type] = (typeMap[t.signal_type] || 0) + 1; });
+  const segs = Object.entries(typeMap).map(([k,v], i) => ({
+    val: v, color: colors[i % colors.length], label: k
+  }));
+  drawDonut('donut-chart', segs);
+
+  const legend = document.getElementById('donut-legend');
+  legend.innerHTML = segs.map((s,i) =>
+    `<div class="legend-item">
+       <span class="legend-dot" style="background:${s.color}"></span>
+       <span>${s.label} <b>(${s.val})</b></span>
+     </div>`
+  ).join('');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER UI
+══════════════════════════════════════════════════════════════ */
+function fmt(n, dec=2) {
+  const v = parseFloat(n);
+  return isNaN(v) ? '—' : v.toFixed(dec);
+}
+
+function renderKPIs(s) {
+  document.getElementById('kpi-total').textContent   = s.total || 0;
+  document.getElementById('kpi-sub-total').textContent = `${s.wins||0}W · ${s.losses||0}L`;
+
+  const wr = s.win_rate || 0;
+  const wrEl = document.getElementById('kpi-winrate');
+  wrEl.textContent = wr.toFixed(1) + '%';
+  wrEl.className = 'stat-value ' + (wr >= 50 ? 'positive' : 'negative');
+
+  const plEl = document.getElementById('kpi-pl');
+  const pl = parseFloat(s.total_pl || 0);
+  plEl.textContent = (pl >= 0 ? '+' : '') + pl.toFixed(2);
+  plEl.className = 'stat-value ' + (pl >= 0 ? 'positive' : 'negative');
+
+  document.getElementById('kpi-best').textContent  = '+' + fmt(s.best);
+  document.getElementById('kpi-worst').textContent = fmt(s.worst);
+
+  // Ring
+  document.getElementById('ring-pct').textContent = wr.toFixed(0) + '%';
+  document.getElementById('ring-sub').textContent = `${s.wins||0} / ${s.total||0} trades`;
+  document.getElementById('ring-wins').textContent = s.wins || 0;
+  document.getElementById('ring-losses').textContent = s.losses || 0;
+  drawRing(wr);
+}
+
+function renderPosition(p) {
+  const card  = document.getElementById('pos-card');
+  const badge = document.getElementById('pos-badge');
+  const plEl  = document.getElementById('pos-pl');
+  const stageEl = document.getElementById('kpi-stage');
+
+  if (!p || (!p.entry_price && !p.signal_type)) {
+    card.className  = 'position-card none';
+    badge.className = 'pos-badge none';
+    badge.textContent = '⬛ NO POSITION';
+    plEl.className = 'pos-pl neutral';
+    plEl.textContent = '+0.00 USDT';
+    document.getElementById('pos-entry').textContent = '—';
+    document.getElementById('pos-sl').textContent    = '—';
+    document.getElementById('pos-tp').textContent    = '—';
+    document.getElementById('pos-atr').textContent   = '—';
+    document.getElementById('trail-label').textContent = 'Trail Stage: —';
+    stageEl.textContent = '—';
+    document.querySelectorAll('.trail-stage-pip').forEach(el => {
+      el.className = 'trail-stage-pip';
+    });
+    return;
+  }
+
+  const isLong = p.is_long;
+  card.className  = 'position-card ' + (isLong ? 'long' : 'short');
+  badge.className = 'pos-badge ' + (isLong ? 'long' : 'short');
+  badge.textContent = isLong ? '▲ LONG' : '▼ SHORT';
+
+  document.getElementById('pos-entry').textContent = fmt(p.entry_price, 1);
+  document.getElementById('pos-sl').textContent    = fmt(p.current_sl || p.sl, 1);
+  document.getElementById('pos-tp').textContent    = fmt(p.tp, 1);
+  document.getElementById('pos-atr').textContent   = fmt(p.atr, 1);
+
+  const stage = p.trail_stage || 0;
+  document.getElementById('trail-label').textContent = `Trail Stage: ${stage}/5`;
+  stageEl.textContent = stage;
+
+  document.querySelectorAll('.trail-stage-pip').forEach(el => {
+    const s = parseInt(el.getAttribute('data-s'));
+    el.className = 'trail-stage-pip ' + (s < stage ? 'done' : s === stage ? 'active' : '');
+  });
+
+  // Simulated unrealised PL (demo)
+  const diff = p.entry_price ? (Math.random() - 0.4) * 200 : 0;
+  const upnl = (isLong ? diff : -diff) * 30;
+  plEl.className = 'pos-pl ' + (upnl >= 0 ? 'positive' : 'negative');
+  plEl.textContent = (upnl >= 0 ? '+' : '') + upnl.toFixed(2) + ' USDT';
+}
+
+function renderTable(trades) {
+  const tbody = document.getElementById('trade-table-body');
+  if (!trades || !trades.length) {
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No trades yet</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = [...trades].reverse().slice(0, 50).map((t, i) => {
+    const win = t.real_pl > 0;
+    const dir = t.is_long;
+    const ts  = new Date(t.ts).toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'});
+    return `<tr>
+      <td class="mono">${trades.length - i}</td>
+      <td style="color:var(--text-2)">${ts}</td>
+      <td>${t.signal_type}</td>
+      <td class="${dir ? 'dir-long' : 'dir-short'}">${dir ? '▲ L' : '▼ S'}</td>
+      <td class="mono">${fmt(t.entry_price,1)}</td>
+      <td class="mono ${win ? 'win' : 'loss'}">${fmt(t.exit_price,1)}</td>
+      <td class="mono" style="color:var(--accent-r)">${fmt(t.sl,1)}</td>
+      <td class="mono" style="color:var(--accent-g)">${fmt(t.tp,1)}</td>
+      <td class="mono">${t.trail_stage || 0}</td>
+      <td style="color:var(--text-2)">${t.exit_reason}</td>
+      <td class="mono ${win ? 'win' : 'loss'}">${t.real_pl > 0 ? '+' : ''}${fmt(t.real_pl)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MAIN REFRESH LOOP
+══════════════════════════════════════════════════════════════ */
+async function refresh() {
+  const data = await fetchData();
+  renderKPIs(data.summary);
+  renderPosition(data.open_trade);
+  renderTable(data.trades);
+  _allTrades = data.trades || [];
+  redrawCharts();
+}
+
+refresh();
+setInterval(refresh, 5000);
+
+// Redraw charts on resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(redrawCharts, 150);
+});
+</script>
+</body>
+</html>
