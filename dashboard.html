@@ -485,7 +485,6 @@ footer {
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-brand">
     <span class="dot"></span>
@@ -505,10 +504,8 @@ footer {
   </div>
 </nav>
 
-<!-- MAIN -->
 <div class="container">
 
-  <!-- API Config note -->
   <div style="margin-bottom:18px;">
     <div class="api-note">
       📡 Bot API endpoint:
@@ -517,7 +514,6 @@ footer {
     </div>
   </div>
 
-  <!-- KPI ROW -->
   <div class="section-label">Performance Overview</div>
   <div class="stats-row" id="kpi-row">
     <div class="stat-card fade-in" style="--card-accent:var(--accent-b); animation-delay:.05s">
@@ -558,7 +554,6 @@ footer {
     </div>
   </div>
 
-  <!-- OPEN POSITION -->
   <div class="section-label">Open Position</div>
   <div class="position-card none" id="pos-card">
     <div class="pos-header">
@@ -581,7 +576,6 @@ footer {
     <div class="trail-stage-label" id="trail-label">Trail Stage: —</div>
   </div>
 
-  <!-- CHARTS ROW -->
   <div class="grid-2 fade-in" style="animation-delay:.35s">
     <div class="panel">
       <div class="panel-title"><span class="icon">📈</span> Cumulative P/L</div>
@@ -627,7 +621,6 @@ footer {
     </div>
   </div>
 
-  <!-- TRADE LOG -->
   <div class="panel fade-in" style="animation-delay:.45s">
     <div class="panel-title"><span class="icon">📋</span> Trade History</div>
     <div class="table-wrap">
@@ -750,20 +743,22 @@ document.getElementById('api-url-display').textContent = API_BASE;
 
 async function fetchData() {
   try {
-    const [sumRes, tradesRes, posRes] = await Promise.all([
+    const [sumRes, tradesRes, posRes, statusRes] = await Promise.all([
       fetch(`${API_BASE}/api/summary`, {signal: AbortSignal.timeout(3000)}),
       fetch(`${API_BASE}/api/trades?limit=50`, {signal: AbortSignal.timeout(3000)}),
       fetch(`${API_BASE}/api/position`, {signal: AbortSignal.timeout(3000)}),
+      fetch(`${API_BASE}/api/status`, {signal: AbortSignal.timeout(3000)})
     ]);
     if (!sumRes.ok) throw new Error('API unavailable');
     return {
       summary:    await sumRes.json(),
       trades:     await tradesRes.json(),
       open_trade: posRes.ok ? await posRes.json() : null,
+      bot_status: statusRes.ok ? await statusRes.json() : { status: 'offline' }
     };
   } catch {
     // Use demo data when bot isn't running locally
-    return makeDemoData();
+    return { ...makeDemoData(), bot_status: { status: 'offline' } };
   }
 }
 
@@ -1082,11 +1077,30 @@ function renderTable(trades) {
   }).join('');
 }
 
+function renderStatus(st) {
+  const badge = document.getElementById('bot-status');
+  const text = document.getElementById('status-text');
+  
+  if (st && st.status === 'live') {
+    badge.className = 'status-badge live';
+    text.textContent = 'LIVE';
+    badge.style = ''; // clear inline styles
+  } else {
+    // Basic offline styling fallback 
+    badge.className = 'status-badge'; 
+    badge.style.background = 'rgba(255,77,109,0.1)';
+    badge.style.borderColor = 'rgba(255,77,109,0.3)';
+    badge.style.color = 'var(--accent-r)';
+    text.textContent = 'OFFLINE';
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════
    MAIN REFRESH LOOP
 ══════════════════════════════════════════════════════════════ */
 async function refresh() {
   const data = await fetchData();
+  renderStatus(data.bot_status);
   renderKPIs(data.summary);
   renderPosition(data.open_trade);
   renderTable(data.trades);
