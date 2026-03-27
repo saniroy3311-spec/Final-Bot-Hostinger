@@ -4,3 +4,4 @@ numpy>=1.24.0
 aiohttp>=3.9.0
 websockets>=12.0
 python-dotenv>=1.0.0
+pandas_ta>=0.3.14b
