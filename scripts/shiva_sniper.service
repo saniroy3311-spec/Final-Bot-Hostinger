@@ -7,6 +7,11 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/shiva_sniper_bot
+
+# KEY FIX: Load the .env file so all API keys are injected as env vars.
+# Without this line the bot starts with "YOUR_API_KEY" → invalid_api_key error.
+EnvironmentFile=/home/ubuntu/shiva_sniper_bot/.env
+
 ExecStart=/home/ubuntu/shiva_sniper_bot/venv/bin/python main.py
 Restart=always
 RestartSec=10
