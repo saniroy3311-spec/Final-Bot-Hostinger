@@ -342,6 +342,25 @@ class Journal:
             logger.error(f"get_open_trade failed: {e}")
             return None
 
+    def get_trades(self, limit: int = 50) -> list:
+        """Return recent trades for the dashboard."""
+        try:
+            cur = self._cursor()
+            cur.execute(f"""
+                SELECT ts, signal_type, is_long, entry_price, exit_price,
+                       sl, tp, atr, qty, real_pl, exit_reason, trail_stage
+                FROM trades
+                ORDER BY id DESC
+                LIMIT {self._ph()}
+            """, (limit,))
+            rows = cur.fetchall()
+            keys = ["ts", "signal_type", "is_long", "entry_price", "exit_price",
+                    "sl", "tp", "atr", "qty", "real_pl", "exit_reason", "trail_stage"]
+            return [dict(zip(keys, row)) for row in rows]
+        except Exception as e:
+            logger.error(f"get_trades failed: {e}")
+            return []
+
     def close(self) -> None:
         if self._conn:
             self._conn.close()
