@@ -180,6 +180,7 @@ class TrailMonitor:
             )
             state.max_sl_fired = True
             self._running = False
+            await self.telegram.notify_max_sl(current_price, entry_price) # Added notify
             try:
                 await self.order_mgr.close_position(reason="Max SL Hit")
             except Exception as e:
@@ -203,6 +204,7 @@ class TrailMonitor:
             )
             state.be_done     = True
             state.current_sl  = entry_price
+            await self.telegram.notify_breakeven(entry_price) # Added notify
             try:
                 # Use flat buffer for BE (ATR-dynamic not yet critical at this stage)
                 from config import BRACKET_SL_BUFFER
@@ -214,6 +216,7 @@ class TrailMonitor:
         new_stage = calc_trail_stage(profit_dist, atr)
         if new_stage > state.stage:
             logger.info(f"TRAIL stage {state.stage} → {new_stage}")
+            await self.telegram.notify_trail_stage(state.stage, new_stage, current_price, state.current_sl) # Added notify
             state.stage = new_stage
 
         if state.stage > 0:
