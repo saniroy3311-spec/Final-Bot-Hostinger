@@ -61,6 +61,21 @@ async def get_position(request):
         "current_sl": bot.trail_state.current_sl
     })
 
+async def get_trades(request):
+    """Feeds the trade history table on the dashboard."""
+    bot = request.app['bot']
+    limit = int(request.query.get('limit', 50))
+    trades = bot.journal.get_trades(limit)
+    return web.json_response(trades)
+
+async def get_status(request):
+    """Feeds the LIVE/OFFLINE badge on the dashboard."""
+    bot = request.app['bot']
+    return web.json_response({
+        "status": "live" if bot.feed else "offline",
+        "in_position": bot.in_position
+    })
+
 async def start_health_server(bot_instance):
     port = int(os.environ.get("PORT", 10000))
     app  = web.Application()
@@ -71,6 +86,8 @@ async def start_health_server(bot_instance):
     app.router.add_get("/health", lambda r: web.Response(text="OK"))
     app.router.add_get("/api/summary", get_summary)
     app.router.add_get("/api/position", get_position)
+    app.router.add_get("/api/trades", get_trades)
+    app.router.add_get("/api/status", get_status)
     
     runner = web.AppRunner(app)
     await runner.setup()
@@ -130,6 +147,7 @@ class SniperBot:
             self.trail_state = TrailState()
             self.trail_mon.start(risk, self.trail_state)
             self.journal.open_trade(sig.signal_type.value, sig.is_long, risk.entry_price, risk.sl, risk.tp, snap.atr, ALERT_QTY)
+            await self.telegram.notify_entry(sig.signal_type.value, risk.entry_price, risk.sl, risk.tp, snap.atr) # Added notify
         else:
             pos = await self.order_mgr.fetch_position()
             if pos is None or pos.get("contracts", 0) == 0:
@@ -139,11 +157,15 @@ class SniperBot:
         self.trail_mon.stop()
         self.in_position = False
         self.journal.close_open_trade()
+        # You can add logic here to fetch real_pl, exit_price, and exit_reason to properly notify
+        await self.telegram.notify_exit("Position Closed", 0, 0, 0) # Placeholder values until you fetch actuals from delta
 
     async def run(self) -> None:
+        await self.telegram.notify_start()
         await self.feed.start()
 
     async def shutdown(self, reason: str = "redeploy") -> None:
+        await self.telegram.notify_stop()
         self.trail_mon.stop()
         await self.order_mgr.close_exchange()
         await self.telegram.close()
